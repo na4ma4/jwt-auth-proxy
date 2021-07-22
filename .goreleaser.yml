@@ -42,6 +42,12 @@ dockers:
     - "ghcr.io/na4ma4/jwt-auth-proxy:latest"
     extra_files:
     - "scripts/replace-links-in-ssl-certs.sh"
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
 
 nfpms:
   -
