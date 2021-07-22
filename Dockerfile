@@ -13,11 +13,13 @@ RUN /replace-links-in-ssl-certs.sh
 
 FROM scratch
 
+LABEL org.opencontainers.image.source https://github.com/na4ma4/jwt-auth-proxy
+
+ENV HTTP_PORT="80" AUDIENCE="tls-web-client-auth" BACKEND_URL=""
+EXPOSE 80/tcp
+ENTRYPOINT [ "/jwt-auth-proxy" ]
+
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
-ENV HTTP_PORT="80" AUDIENCE="tls-web-client-auth" BACKEND_URL=""
-
-EXPOSE 80/tcp
-ENTRYPOINT [ "/jwt-auth-proxy" ]
 COPY jwt-auth-proxy /
