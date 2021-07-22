@@ -1,6 +1,7 @@
 # jwt-auth-proxy
 
 [![CI](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/codeql-analysis.yml)
 [![GitHub issues](https://img.shields.io/github/issues/na4ma4/jwt-auth-proxy)](https://github.com/na4ma4/jwt-auth-proxy/issues)
 [![GitHub forks](https://img.shields.io/github/forks/na4ma4/jwt-auth-proxy)](https://github.com/na4ma4/jwt-auth-proxy/network)
 [![GitHub stars](https://img.shields.io/github/stars/na4ma4/jwt-auth-proxy)](https://github.com/na4ma4/jwt-auth-proxy/stargazers)
