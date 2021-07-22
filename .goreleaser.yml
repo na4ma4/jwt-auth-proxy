@@ -1,0 +1,69 @@
+env:
+  - CGO_ENABLED=0
+
+before:
+  hooks:
+    - make test
+    - go generate ./...
+    - go mod tidy
+    - go mod download
+
+builds:
+  - id: jwt-auth-proxy
+    main: ./cmd/jwt-auth-proxy
+    binary: jwt-auth-proxy
+    targets:
+      - linux_amd64
+      - linux_arm64
+      - windows_amd64
+      - darwin_amd64
+      - darwin_arm64
+
+archives:
+
+checksum:
+  algorithm: sha256
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+dockers:
+  - image_templates:
+    - "ghcr.io/na4ma4/jwt-auth-proxy:{{ .Tag }}"
+    - "ghcr.io/na4ma4/jwt-auth-proxy:{{ .Major }}"
+    - "ghcr.io/na4ma4/jwt-auth-proxy:latest"
+    extra_files:
+    - "scripts/replace-links-in-ssl-certs.sh"
+
+nfpms:
+  -
+    id: jwt-auth-proxy
+    package_name: jwt-auth-proxy
+    file_name_template: "jwt-auth-proxy_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    builds:
+      - jwt-auth-proxy
+    homepage: https://github.com/na4ma4/jwt-auth-proxy
+    maintainer: na4ma4 <na4ma4@users.noreply.github.com>
+    description: JWT-based Authentication Proxy
+    formats:
+      - apk
+      - deb
+    bindir: /usr/bin
+    contents:
+      - src: "systemd/jwt-auth-proxy.service"
+        dst: "/lib/systemd/system/jwt-auth-proxy.service"
+    overrides:
+      deb:
+        scripts:
+          preinstall: "nfpms/pre-install.sh"
+          postinstall: "nfpms/post-install.sh"
+          preremove: "nfpms/pre-remove.sh"
+          postremove: "nfpms/post-remove.sh"

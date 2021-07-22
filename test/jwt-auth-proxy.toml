@@ -1,0 +1,3 @@
+[server]
+auth-ca="artifacts/cfssl/ca.pem"
+ca-bundle="artifacts/cfssl/ca.pem"

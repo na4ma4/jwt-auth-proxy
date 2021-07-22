@@ -1,0 +1,14 @@
+[Unit]
+Description=JWT-based Authentication Proxy
+BindTo=network.target
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/jwt-auth-proxy --watchdog
+Type=simple
+Restart=always
+RestartSec=3
+WatchdogSec=90
