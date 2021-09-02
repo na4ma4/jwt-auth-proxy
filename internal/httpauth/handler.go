@@ -23,7 +23,7 @@ func (b *BasicAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if len(b.BypassPaths) > 0 {
 		for _, bypassPath := range b.BypassPaths {
-			if strings.HasPrefix(r.RequestURI, bypassPath) {
+			if strings.EqualFold(r.RequestURI, bypassPath) {
 				b.Handler.ServeHTTP(w, r)
 
 				return

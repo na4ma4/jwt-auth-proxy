@@ -102,17 +102,6 @@ var _ = Describe("httpauth", func() {
 			expectSuccessBody(res)
 		})
 
-		It("with no authentication to subdirectory of bypass endpoint", func() {
-			c := ts.Client()
-			res, err := c.Get(fmt.Sprintf("%s/v2/subpath", ts.URL))
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.StatusCode).To(Equal(http.StatusOK))
-			Expect(res.Status).To(Equal("200 OK"))
-			Expect(res.Header.Get("WWW-Authenticate")).To(BeEmpty())
-
-			expectSuccessBody(res)
-		})
-
 		It("with valid authentication to bypass endpoint", func() {
 			c := ts.Client()
 			r, err := http.NewRequest(http.MethodGet, fmt.Sprintf(fmt.Sprintf("%s/v2/subpath", ts.URL)), nil)
@@ -157,5 +146,15 @@ var _ = Describe("httpauth", func() {
 	})
 
 	Context("should fail", func() {
+		It("with no authentication to subdirectory of bypass endpoint", func() {
+			c := ts.Client()
+			res, err := c.Get(fmt.Sprintf("%s/v2/subpath", ts.URL))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(res.StatusCode).To(Equal(http.StatusUnauthorized))
+			Expect(res.Status).To(Equal("401 Unauthorized"))
+			Expect(res.Header.Get("WWW-Authenticate")).To(ContainSubstring(`realm="im-a-test-realm"`))
+
+			expectNotSuccessBody(res)
+		})
 	})
 })
