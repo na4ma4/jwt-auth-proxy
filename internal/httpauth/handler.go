@@ -2,12 +2,14 @@ package httpauth
 
 import (
 	"net/http"
+	"strings"
 )
 
 // BasicAuthHandler is a http.Handler that uses BasicAuthWrapper to provide basic authentication support.
 type BasicAuthHandler struct {
-	Handler    http.Handler
-	RemoveAuth bool
+	Handler     http.Handler
+	RemoveAuth  bool
+	BypassPaths []string
 
 	*BasicAuthWrapper
 }
@@ -18,6 +20,16 @@ func (b *BasicAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		username string
 		ok       bool
 	)
+
+	if len(b.BypassPaths) > 0 {
+		for _, bypassPath := range b.BypassPaths {
+			if strings.HasPrefix(r.RequestURI, bypassPath) {
+				b.Handler.ServeHTTP(w, r)
+
+				return
+			}
+		}
+	}
 
 	// Check if we have a user-provided error handler, else set a default
 	if b.UnauthorizedHandler == nil {

@@ -1,5 +1,6 @@
-GO_MATRIX_OS ?= darwin linux windows
-GO_MATRIX_ARCH ?= amd64
+GO_MATRIX += darwin/amd64 darwin/arm64
+GO_MATRIX += linux/amd64 linux/arm linux/arm64
+GO_MATRIX += windows/amd64
 
 APP_DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_HASH ?= $(shell git show -s --format=%h)
@@ -16,7 +17,6 @@ GENERATED_FILES += artifacts/certs/cert.pem
 GENERATED_FILES += artifacts/certs/key.pem
 
 -include .makefiles/Makefile
--include .makefiles/pkg/protobuf/v2/Makefile
 -include .makefiles/pkg/go/v1/Makefile
 -include .makefiles/ext/na4ma4/lib/golangci-lint/v1/Makefile
 -include .makefiles/ext/na4ma4/lib/cfssl/v1/Makefile
@@ -54,14 +54,14 @@ artifacts/dockertest/dev: artifacts/build/debug/linux/amd64/jwt-auth-proxy Docke
 	cp "$(<)" "artifacts/dockertmp/"
 	cp "Dockerfile" "artifacts/dockertmp/"
 	cp scripts/replace-links-in-ssl-certs.sh artifacts/dockertmp/scripts/
-	docker build -t gcr.io/na4ma4/jwt-auth-proxy:dev -f Dockerfile artifacts/dockertmp | tee "$(@)"
+	docker build -t ghcr.io/na4ma4/jwt-auth-proxy:dev -f Dockerfile artifacts/dockertmp | tee "$(@)"
 
 .PHONY: docker-local
 docker-local: artifacts/dockertest/dev
 
 .PHONY: docker-test
 docker-test: artifacts/dockertest/dev artifacts/certs/ca.pem
-	docker run -ti --rm -p 8011:80/tcp -v "$(shell pwd)/artifacts/certs/ca.pem:/run/secrets/ca.pem" -e "LEGACY_USERS=test1:test2" -e "REMOVE_AUTH_HEADER=true" -e "BACKEND_URL=http://github.com" gcr.io/na4ma4/jwt-auth-proxy:dev
+	docker run -ti --rm -p 8011:80/tcp -v "$(shell pwd)/artifacts/certs/ca.pem:/run/secrets/ca.pem" -e "BYPASS_AUTH_PATHS=/v2/" -e "LEGACY_USERS=test1:test2" -e "REMOVE_AUTH_HEADER=true" -e "BACKEND_URL=http://github.com" ghcr.io/na4ma4/jwt-auth-proxy:dev
 
 
 ######################

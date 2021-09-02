@@ -44,6 +44,7 @@ var _ = Describe("httpauth", func() {
 		logger = zap.New(logcore)
 
 		authenticator := &httpauth.BasicAuthHandler{
+			BypassPaths: []string{"/v2/"},
 			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintln(w, successContent)
 			}),
@@ -88,6 +89,42 @@ var _ = Describe("httpauth", func() {
 			Expect(res.Header.Get("WWW-Authenticate")).To(ContainSubstring(`realm="im-a-test-realm"`))
 
 			expectNotSuccessBody(res)
+		})
+
+		It("with no authentication to bypass endpoint", func() {
+			c := ts.Client()
+			res, err := c.Get(fmt.Sprintf("%s/v2/", ts.URL))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(res.StatusCode).To(Equal(http.StatusOK))
+			Expect(res.Status).To(Equal("200 OK"))
+			Expect(res.Header.Get("WWW-Authenticate")).To(BeEmpty())
+
+			expectSuccessBody(res)
+		})
+
+		It("with no authentication to subdirectory of bypass endpoint", func() {
+			c := ts.Client()
+			res, err := c.Get(fmt.Sprintf("%s/v2/subpath", ts.URL))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(res.StatusCode).To(Equal(http.StatusOK))
+			Expect(res.Status).To(Equal("200 OK"))
+			Expect(res.Header.Get("WWW-Authenticate")).To(BeEmpty())
+
+			expectSuccessBody(res)
+		})
+
+		It("with valid authentication to bypass endpoint", func() {
+			c := ts.Client()
+			r, err := http.NewRequest(http.MethodGet, fmt.Sprintf(fmt.Sprintf("%s/v2/subpath", ts.URL)), nil)
+			Expect(err).NotTo(HaveOccurred())
+			r.SetBasicAuth("test", "valid-pass")
+			res, err := c.Do(r)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(res.StatusCode).To(Equal(http.StatusOK))
+			Expect(res.Status).To(Equal("200 OK"))
+			Expect(res.Header.Get("WWW-Authenticate")).To(BeEmpty())
+
+			expectSuccessBody(res)
 		})
 
 		It("with valid authentication", func() {

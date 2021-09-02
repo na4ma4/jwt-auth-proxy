@@ -65,8 +65,17 @@ func init() {
 			"for allowing migration from a system with an old common login (allows it to work *temporarily*)",
 	)
 
+	rootCmd.PersistentFlags().StringSliceP(
+		"bypass-auth-path",
+		"b",
+		[]string{},
+		"List of paths that bypass authentication (are returned without checking auth)",
+	)
+
 	_ = viper.BindPFlag("server.legacy-users", rootCmd.PersistentFlags().Lookup("legacy-user"))
 	_ = viper.BindEnv("server.legacy-users", "LEGACY_USERS")
+	_ = viper.BindPFlag("server.bypass-paths", rootCmd.PersistentFlags().Lookup("bypass-auth-path"))
+	_ = viper.BindEnv("server.bypass-paths", "BYPASS_AUTH_PATHS")
 
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Debug output")
 	_ = viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
@@ -192,6 +201,7 @@ func mainCommand(cmd *cobra.Command, args []string) {
 	authFunc = addLegacyAuthFunc(logger, cliLegacyUsers, authFunc)
 	s := http.NewServeMux()
 	authenticator := &httpauth.BasicAuthHandler{
+		BypassPaths: cfg.GetStringSlice("server.bypass-paths"),
 		Handler: handlers.ProxyHeaders(
 			proxy.NewSingleHostReverseProxy(u, cfg.GetBool("server.pass-host-header"), tlsConfig),
 		),

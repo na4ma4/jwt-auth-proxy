@@ -55,7 +55,7 @@ func makeTokenCommand(cmd *cobra.Command, args []string) {
 			Expires:   pascaljwt.NewNumericTime(time.Now().Add(24 * time.Hour)),
 			NotBefore: pascaljwt.NewNumericTime(time.Now()),
 			Issued:    pascaljwt.NewNumericTime(time.Now()),
-			ID:        uuid.NewV4().String(),
+			ID:        uuid.Must(uuid.NewV4()).String(),
 		},
 		Set: map[string]interface{}{
 			"Online": true,

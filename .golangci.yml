@@ -7,3 +7,6 @@ linters:
     - maligned
     - paralleltest
     - scopelint
+
+run:
+  tests: false

@@ -12,12 +12,15 @@ builds:
   - id: jwt-auth-proxy
     main: ./cmd/jwt-auth-proxy
     binary: jwt-auth-proxy
-    targets:
-      - linux_amd64
-      - linux_arm64
-      - windows_amd64
-      - darwin_amd64
-      - darwin_arm64
+    flags:
+      - -tags=release
+      - -buildmode=default
+      - -trimpath
+      - -v
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    goarm: [5, 7]
+    goos: ['linux', 'darwin', 'windows']
+    goarch: ['amd64', 'arm', 'arm64']
 
 archives:
 
