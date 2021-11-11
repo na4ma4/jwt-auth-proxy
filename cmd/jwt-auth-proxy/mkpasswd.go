@@ -58,7 +58,5 @@ func makePasswordCommand(cmd *cobra.Command, args []string) {
 		logger.Panic("generate password failure", zap.Error(err))
 	}
 
-	logger.Debug("password returned", zap.ByteString("passwd", passwd))
-
 	fmt.Printf("%s:%s\n", username, passwd)
 }
