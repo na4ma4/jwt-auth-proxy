@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/koshatul/jwt/v2"
 	"github.com/na4ma4/jwt-auth-proxy/internal/httpauth"
+	"github.com/na4ma4/jwt/v2"
 	"go.uber.org/zap"
 )
 
@@ -52,6 +52,7 @@ func doAuthRunner(logger *zap.Logger, verifier jwt.Verifier, request *AuthReques
 		request.ReturnChannel <- &AuthResponse{
 			Error: err,
 		}
+		close(request.ReturnChannel)
 
 		return
 	}
@@ -61,6 +62,7 @@ func doAuthRunner(logger *zap.Logger, verifier jwt.Verifier, request *AuthReques
 		request.ReturnChannel <- &AuthResponse{
 			Error: ErrUsernameIsEmpty,
 		}
+		close(request.ReturnChannel)
 
 		return
 	}
@@ -70,6 +72,7 @@ func doAuthRunner(logger *zap.Logger, verifier jwt.Verifier, request *AuthReques
 			Result: result,
 			Error:  fmt.Errorf("%w: online tokens can not be validated", ErrInvalidToken),
 		}
+		close(request.ReturnChannel)
 
 		return
 	}
@@ -78,6 +81,7 @@ func doAuthRunner(logger *zap.Logger, verifier jwt.Verifier, request *AuthReques
 		Result: result,
 		Error:  nil,
 	}
+	close(request.ReturnChannel)
 }
 
 // AuthCheckFunc returns a authentication check function for use with `httpauth.BasicAuth()``.

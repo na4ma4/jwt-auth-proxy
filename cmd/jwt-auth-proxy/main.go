@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
-	"github.com/koshatul/jwt/v2"
 	"github.com/na4ma4/config"
 	"github.com/na4ma4/jwt-auth-proxy/internal/httpauth"
 	"github.com/na4ma4/jwt-auth-proxy/internal/jwtauth"
@@ -21,6 +20,7 @@ import (
 	"github.com/na4ma4/jwt-auth-proxy/internal/logformat"
 	"github.com/na4ma4/jwt-auth-proxy/internal/mainconfig"
 	"github.com/na4ma4/jwt-auth-proxy/internal/proxy"
+	"github.com/na4ma4/jwt/v2"
 	cache "github.com/patrickmn/go-cache"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -132,7 +132,7 @@ func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) (ve
 	var err error
 
 	if verifier, err = jwt.NewRSAVerifierFromFile(
-		cfg.GetString("server.audience"),
+		[]string{cfg.GetString("server.audience")},
 		cfg.GetString("server.auth-ca"),
 	); err != nil {
 		logger.Error("starting jwt verifier", zap.Error(err))
