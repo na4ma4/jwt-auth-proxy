@@ -53,12 +53,12 @@ func makePasswordCommand(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	pw, err := bcrypt.GenerateFromPassword([]byte(password), cfg.GetInt("auth.mincost"))
+	passwd, err := bcrypt.GenerateFromPassword([]byte(password), cfg.GetInt("auth.mincost"))
 	if err != nil {
 		logger.Panic("generate password failure", zap.Error(err))
 	}
 
-	logger.Debug("password returned", zap.ByteString("pw", pw))
+	logger.Debug("password returned", zap.ByteString("passwd", passwd))
 
-	fmt.Printf("%s:%s\n", username, pw)
+	fmt.Printf("%s:%s\n", username, passwd)
 }

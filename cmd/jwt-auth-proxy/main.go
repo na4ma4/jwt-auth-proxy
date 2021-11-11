@@ -106,14 +106,14 @@ func addLegacyAuthFunc(
 		legacyUsers := make(map[string]legacy.AuthItem)
 
 		for _, user := range cliLegacyUsers {
-			s := strings.SplitN(user, ":", userPassSepCount)
+			legacyUser := strings.SplitN(user, ":", userPassSepCount)
 
-			if len(s) == userPassSepCount {
-				logger.Debug("Appending user to legacyUsers", zap.String("username", s[0]))
+			if len(legacyUser) == userPassSepCount {
+				logger.Debug("Appending user to legacyUsers", zap.String("username", legacyUser[0]))
 
-				legacyUsers[s[0]] = legacy.AuthItem{
-					Username: s[0],
-					Password: s[1],
+				legacyUsers[legacyUser[0]] = legacy.AuthItem{
+					Username: legacyUser[0],
+					Password: legacyUser[1],
 				}
 			}
 		}
@@ -183,7 +183,7 @@ func mainCommand(cmd *cobra.Command, args []string) {
 	logger, _ := cfg.ZapConfig().Build()
 	defer logger.Sync() //nolint:errcheck
 
-	u := backendURIOrBust(cmd, cfg, logger)
+	backendURI := backendURIOrBust(cmd, cfg, logger)
 	verifier := verifierOrBust(cmd, cfg, logger)
 
 	go jwtauth.AuthRunner(ctx, logger, verifier, authChan)
@@ -199,11 +199,11 @@ func mainCommand(cmd *cobra.Command, args []string) {
 	authFunc := jwtauth.AuthCheckFunc(logger, authChan)
 	cliLegacyUsers := cfg.GetStringSlice("server.legacy-users")
 	authFunc = addLegacyAuthFunc(logger, cliLegacyUsers, authFunc)
-	s := http.NewServeMux()
+	httpSrvMux := http.NewServeMux()
 	authenticator := &httpauth.BasicAuthHandler{
 		BypassPaths: cfg.GetStringSlice("server.bypass-paths"),
 		Handler: handlers.ProxyHeaders(
-			proxy.NewSingleHostReverseProxy(u, cfg.GetBool("server.pass-host-header"), tlsConfig),
+			proxy.NewSingleHostReverseProxy(backendURI, cfg.GetBool("server.pass-host-header"), tlsConfig),
 		),
 		RemoveAuth: cfg.GetBool("server.remove-authorization-header"),
 		BasicAuthWrapper: &httpauth.BasicAuthWrapper{
@@ -215,7 +215,7 @@ func mainCommand(cmd *cobra.Command, args []string) {
 		},
 	}
 
-	s.Handle("/", handlers.CustomLoggingHandler(
+	httpSrvMux.Handle("/", handlers.CustomLoggingHandler(
 		os.Stdout,
 		authenticator,
 		logformat.WriteCombinedLog,
@@ -229,7 +229,7 @@ func mainCommand(cmd *cobra.Command, args []string) {
 		zap.String("proxy-uri", cfg.GetString("server.backend-uri")),
 	)
 
-	if err := http.ListenAndServe(bindAddr, s); err != nil {
+	if err := http.ListenAndServe(bindAddr, httpSrvMux); err != nil {
 		logger.Fatal("HTTP Server Error", zap.Error(err))
 	}
 }
