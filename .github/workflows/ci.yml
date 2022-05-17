@@ -4,94 +4,20 @@ on:
   pull_request:
   push:
     branches:
-      - '*'
+    - '*'
     tags:
-      - 'v*'
+    - 'v*'
 
 jobs:
-  unit-test:
-    name: unit-test
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Go Cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-          artifacts/bin
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1
-      id: go
-
-    - name: Set up go env
-      run: export PATH=${PATH}:`go env GOPATH`/bin
-
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v2.5.2
-      with:
-        skip-pkg-cache: true
-        version: v1.43
-
-    - name: unit-test
-      run: make test
-
-    - name: ci
-      run: make ci
-
+  unittest:
+    uses: na4ma4/actions/.github/workflows/unit-test.yml@v1
 
   goreleaser:
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
-      - unit-test
-    name: goreleaser
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: Go Cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-          artifacts/bin
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1
-      id: go
-
-    - name: Set up go env
-      run: export PATH=${PATH}:`go env GOPATH`/bin
-
-    - name: Docker Login
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
-
-    - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@v2
-      with:
-        version: latest
-        args: release --rm-dist
-      env:
-        GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
+      - unittest
+    uses: na4ma4/actions/.github/workflows/goreleaser.yml@v1
+    secrets:
+      token: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
+    with:
+      docker: true

@@ -2,11 +2,13 @@ linters:
   enable-all: true
   exclude-use-default: false
   disable:
+    - exhaustruct
     - exhaustivestruct
     - golint
     - interfacer
     - ireturn
     - maligned
+    - nonamedreturns
     - paralleltest
     - scopelint
     - varnamelen
