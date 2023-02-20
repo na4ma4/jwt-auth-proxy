@@ -9,7 +9,7 @@ import (
 
 const lowerhex = "0123456789abcdef"
 
-//nolint:cyclop,funlen,gomnd
+//nolint:funlen,gocognit,gomnd // copied from gorilla/handlers.
 func appendQuoted(buf []byte, s string) []byte {
 	var (
 		runeTmp [utf8.UTFMax]byte

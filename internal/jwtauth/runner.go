@@ -84,7 +84,7 @@ func doAuthRunner(logger *zap.Logger, verifier jwt.Verifier, request *AuthReques
 	close(request.ReturnChannel)
 }
 
-// AuthCheckFunc returns a authentication check function for use with `httpauth.BasicAuth()``.
+// AuthCheckFunc returns a authentication check function for use with `httpauth.BasicAuth()“.
 func AuthCheckFunc(logger *zap.Logger, authChan chan *AuthRequest) httpauth.AuthProvider {
 	return func(username, password string, r *http.Request) (string, bool) {
 		recUserCh := make(chan *AuthResponse)

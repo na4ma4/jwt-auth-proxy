@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/na4ma4/config"
 	pascaljwt "github.com/pascaldekloe/jwt"
-	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -38,12 +38,13 @@ func init() {
 }
 
 // Added for future legacy support of bcrypted passwords.
+//
 //nolint:forbidigo,gomnd // printing generated hash of password.
 func makeTokenCommand(cmd *cobra.Command, args []string) {
 	cfg := config.NewViperConfigFromViper(viper.GetViper(), "jwt-auth-proxy")
 
 	logger, _ := cfg.ZapConfig().Build()
-	defer logger.Sync() //nolint:errcheck
+	defer logger.Sync()
 
 	tokenClaims := &pascaljwt.Claims{
 		Registered: pascaljwt.Registered{
@@ -55,7 +56,7 @@ func makeTokenCommand(cmd *cobra.Command, args []string) {
 			Expires:   pascaljwt.NewNumericTime(time.Now().Add(24 * time.Hour)),
 			NotBefore: pascaljwt.NewNumericTime(time.Now()),
 			Issued:    pascaljwt.NewNumericTime(time.Now()),
-			ID:        uuid.Must(uuid.NewV4()).String(),
+			ID:        uuid.NewString(),
 		},
 		Set: map[string]interface{}{
 			"Online": true,

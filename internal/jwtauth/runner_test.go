@@ -1,3 +1,4 @@
+//nolint:gochecknoglobals // Testing
 package jwtauth_test
 
 import (
@@ -12,8 +13,6 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
 )
-
-// const successContent string = "Hello World!"
 
 var appContext context.Context
 var appCancel context.CancelFunc

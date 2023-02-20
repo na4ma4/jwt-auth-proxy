@@ -92,6 +92,7 @@ func defaultUnauthorizedHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetBasicAuthFromRequest returns basic auth username and password given a `*http.Request`.
+//
 //nolint:gomnd // basic authentication format
 func GetBasicAuthFromRequest(r *http.Request) (string, string, error) {
 	const basicScheme string = "Basic "

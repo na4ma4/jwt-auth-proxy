@@ -27,6 +27,10 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	httpServerTimeout = 10 * time.Second
+)
+
 //nolint:gochecknoglobals // cobra uses globals in main
 var rootCmd = &cobra.Command{
 	Use: "jwt-auth-proxy",
@@ -128,8 +132,11 @@ func showHelp(cmd *cobra.Command) {
 	_ = cmd.Help()
 }
 
-func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) (verifier jwt.Verifier) {
-	var err error
+func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) jwt.Verifier {
+	var (
+		verifier jwt.Verifier
+		err      error
+	)
 
 	if verifier, err = jwt.NewRSAVerifierFromFile(
 		[]string{cfg.GetString("server.audience")},
@@ -140,11 +147,14 @@ func verifierOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) (ve
 		os.Exit(1)
 	}
 
-	return
+	return verifier
 }
 
-func backendURIOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) (u *url.URL) {
-	var err error
+func backendURIOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) *url.URL {
+	var (
+		u   *url.URL
+		err error
+	)
 
 	if u, err = url.Parse(cfg.GetString("server.backend-uri")); err != nil {
 		logger.Error("parsing backend URI", zap.String("URI", cfg.GetString("server.backend-uri")), zap.Error(err))
@@ -152,7 +162,7 @@ func backendURIOrBust(cmd *cobra.Command, cfg config.Conf, logger *zap.Logger) (
 		os.Exit(1)
 	}
 
-	return
+	return u
 }
 
 func buildCertPool(cfg config.Conf, logger *zap.Logger) *x509.CertPool {
@@ -181,7 +191,7 @@ func mainCommand(cmd *cobra.Command, args []string) {
 	defer cancel()
 
 	logger, _ := cfg.ZapConfig().Build()
-	defer logger.Sync() //nolint:errcheck
+	defer logger.Sync()
 
 	backendURI := backendURIOrBust(cmd, cfg, logger)
 	verifier := verifierOrBust(cmd, cfg, logger)
@@ -229,7 +239,13 @@ func mainCommand(cmd *cobra.Command, args []string) {
 		zap.String("proxy-uri", cfg.GetString("server.backend-uri")),
 	)
 
-	if err := http.ListenAndServe(bindAddr, httpSrvMux); err != nil {
+	server := &http.Server{
+		Addr:              bindAddr,
+		ReadHeaderTimeout: httpServerTimeout,
+		Handler:           httpSrvMux,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		logger.Fatal("HTTP Server Error", zap.Error(err))
 	}
 }

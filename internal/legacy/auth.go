@@ -17,8 +17,9 @@ type AuthItem struct {
 	Password string
 }
 
-// AuthCheckFunc returns a authentication check function for use with `httpauth.BasicAuth()``.
-//nolint:nestif
+// AuthCheckFunc returns a authentication check function for use with `httpauth.BasicAuth()“.
+//
+//nolint:nestif // refactoring would reduce readability.
 func AuthCheckFunc(
 	logger *zap.Logger,
 	legacyAuthItems map[string]AuthItem,

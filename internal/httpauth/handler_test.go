@@ -104,7 +104,7 @@ var _ = Describe("httpauth", func() {
 
 		It("with valid authentication to bypass endpoint", func() {
 			c := ts.Client()
-			r, err := http.NewRequest(http.MethodGet, fmt.Sprintf(fmt.Sprintf("%s/v2/subpath", ts.URL)), nil)
+			r, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/subpath", ts.URL), nil)
 			Expect(err).NotTo(HaveOccurred())
 			r.SetBasicAuth("test", "valid-pass")
 			res, err := c.Do(r)
