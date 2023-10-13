@@ -40,7 +40,7 @@ func init() {
 // Added for future legacy support of bcrypted passwords.
 //
 //nolint:forbidigo,gomnd // printing generated hash of password.
-func makeTokenCommand(cmd *cobra.Command, args []string) {
+func makeTokenCommand(_ *cobra.Command, args []string) {
 	cfg := config.NewViperConfigFromViper(viper.GetViper(), "jwt-auth-proxy")
 
 	logger, _ := cfg.ZapConfig().Build()

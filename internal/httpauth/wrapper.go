@@ -53,7 +53,7 @@ func (b *BasicAuthWrapper) authenticate(r *http.Request) (string, bool) {
 		return "", false
 	}
 
-	if v, ok := b.Cache.Get(r.Header.Get("Authorization")); ok {
+	if v, cacheOk := b.Cache.Get(r.Header.Get("Authorization")); cacheOk {
 		// ACL Record cached
 		if resp, ok := v.(cachedResponse); ok {
 			if resp.Result {
@@ -87,7 +87,7 @@ func (b *BasicAuthWrapper) authenticate(r *http.Request) (string, bool) {
 }
 
 // defaultUnauthorizedHandler provides a default HTTP 401 Unauthorized response.
-func defaultUnauthorizedHandler(w http.ResponseWriter, r *http.Request) {
+func defaultUnauthorizedHandler(w http.ResponseWriter, _ *http.Request) {
 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 }
 

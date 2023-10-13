@@ -34,8 +34,8 @@ func genClaims(subject string, audience []string) []jwt.Claim {
 }
 
 var _ = Describe("jwtauth", func() {
-	privatekey, err := rsa.GenerateKey(rand.Reader, 2048)
-	Expect(err).NotTo(HaveOccurred())
+	privatekey, pkErr := rsa.GenerateKey(rand.Reader, 2048)
+	Expect(pkErr).NotTo(HaveOccurred())
 	signer := &jwt.RSASigner{
 		PrivateKey: privatekey,
 		Algorithm:  jwt.RS256,

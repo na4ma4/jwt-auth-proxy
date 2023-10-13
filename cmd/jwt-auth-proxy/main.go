@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -171,7 +170,7 @@ func buildCertPool(cfg config.Conf, logger *zap.Logger) *x509.CertPool {
 		rootCAs = x509.NewCertPool()
 	}
 
-	certs, err := ioutil.ReadFile(cfg.GetString("server.ca-bundle"))
+	certs, err := os.ReadFile(cfg.GetString("server.ca-bundle"))
 	if err == nil {
 		logger.Debug("appending custom certs", zap.String("ca-bundle", cfg.GetString("server.ca-bundle")))
 
@@ -183,7 +182,7 @@ func buildCertPool(cfg config.Conf, logger *zap.Logger) *x509.CertPool {
 	return rootCAs
 }
 
-func mainCommand(cmd *cobra.Command, args []string) {
+func mainCommand(cmd *cobra.Command, _ []string) {
 	cfg := config.NewViperConfigFromViper(viper.GetViper(), "jwt-auth-proxy")
 	authChan := make(chan *jwtauth.AuthRequest, authChanSize)
 
