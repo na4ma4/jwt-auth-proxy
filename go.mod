@@ -9,7 +9,7 @@ require (
 	github.com/na4ma4/config v1.0.1
 	github.com/na4ma4/jwt/v2 v2.1.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.27.1
+	github.com/onsi/gomega v1.28.0
 	github.com/pascaldekloe/jwt v1.12.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/spf13/cobra v1.7.0
