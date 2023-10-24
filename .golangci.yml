@@ -327,3 +327,8 @@ issues:
       linters: [ errorlint ]
     # - text: "shadow: declaration of .err. shadows declaration"
     #   linters: [ govet ]
+    # Allow dot imports for ginkgo and gomega
+    - source: ginkgo|gomega
+      linters:
+        - revive
+      text: "should not use dot imports"
