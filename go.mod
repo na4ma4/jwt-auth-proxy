@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/google/uuid v1.4.0
-	github.com/gorilla/handlers v1.5.1
+	github.com/gorilla/handlers v1.5.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/na4ma4/config v1.0.1
 	github.com/na4ma4/jwt/v2 v2.1.0
