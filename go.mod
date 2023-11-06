@@ -12,7 +12,7 @@ require (
 	github.com/onsi/gomega v1.29.0
 	github.com/pascaldekloe/jwt v1.12.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.14.0
