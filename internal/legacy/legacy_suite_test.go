@@ -1,16 +1,20 @@
 package legacy_test
 
 import (
-	"reflect"
-	"testing"
+	"net/http"
 
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/gomega"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 )
 
-func TestSuite(t *testing.T) {
-	type tag struct{}
+//nolint:gochecknoglobals // constant for tests.
+var denyAuthFunc = func(username string, password string, r *http.Request) (string, bool) {
+	return "", false
+}
 
-	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, reflect.TypeOf(tag{}).PkgPath())
+func newLogger() *zap.Logger {
+	// logcore, logobs = observer.New(zap.DebugLevel)
+	logcore, _ := observer.New(zap.DebugLevel)
+	logger := zap.New(logcore)
+	return logger
 }

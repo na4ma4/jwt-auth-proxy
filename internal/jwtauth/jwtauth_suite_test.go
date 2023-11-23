@@ -1,16 +1,22 @@
 package jwtauth_test
 
 import (
-	"reflect"
-	"testing"
+	"time"
 
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/gomega"
+	"github.com/na4ma4/jwt/v2"
 )
 
-func TestSuite(t *testing.T) {
-	type tag struct{}
+const (
+	validAudienceA  = "valid-audience"
+	validAudienceB  = "also-valid"
+	invalidAudience = "invalid-audience"
+)
 
-	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, reflect.TypeOf(tag{}).PkgPath())
+func genClaims(subject string, audience []string) []jwt.Claim {
+	return []jwt.Claim{
+		jwt.String(jwt.Subject, subject),
+		jwt.Strings(jwt.Audience, audience),
+		jwt.Time(jwt.NotBefore, time.Now()),
+		jwt.Time(jwt.Expires, time.Now().Add(time.Hour)),
+	}
 }

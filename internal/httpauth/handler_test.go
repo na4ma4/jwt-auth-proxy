@@ -3,158 +3,127 @@ package httpauth_test
 import (
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"strings"
-	"time"
-
-	"github.com/na4ma4/jwt-auth-proxy/internal/httpauth"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
-	cache "github.com/patrickmn/go-cache"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"go.uber.org/zap/zaptest/observer"
+	"testing"
 )
 
-const successContent string = "Hello World!"
+func TestHTTPAuth_NoAuth(t *testing.T) {
+	ts := newAuthenticator()
 
-var _ = Describe("httpauth", func() {
-	authFunc := func(username string, password string, r *http.Request) (string, bool) {
-		if v, ok := map[string]string{
-			"test": "valid-pass",
-		}[username]; ok {
-			if strings.Compare(v, password) == 0 {
-				return username, true
-			}
-		}
-
-		return "", false
+	c := ts.Client()
+	res, resErr := c.Get(ts.URL)
+	if resErr != nil {
+		t.Errorf("http.Client.Get(%s) got '%v', want '%v'", ts.URL, resErr, nil)
 	}
 
-	var (
-		logcore zapcore.Core
-		logger  *zap.Logger
-		ts      *httptest.Server
-	)
+	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusUnauthorized)
+	expectEqual(t, "res.Status", res.Status, "401 Unauthorized")
 
-	BeforeEach(func() {
-		// logcore, logobs = observer.New(zap.DebugLevel)
-		logcore, _ = observer.New(zap.DebugLevel)
-		logger = zap.New(logcore)
-
-		authenticator := &httpauth.BasicAuthHandler{
-			BypassPaths: []string{"/v2/"},
-			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintln(w, successContent)
-			}),
-			RemoveAuth: true,
-			BasicAuthWrapper: &httpauth.BasicAuthWrapper{
-				Cache:         cache.New(time.Minute, time.Minute),
-				Realm:         "im-a-test-realm",
-				AuthFunc:      authFunc,
-				Logger:        logger,
-				CacheDuration: time.Minute,
-			},
-		}
-
-		ts = httptest.NewTLSServer(authenticator)
-	})
-
-	AfterEach(func() {
-		ts.Close()
-	})
-
-	expectSuccessBody := func(res *http.Response) {
-		p := make([]byte, len(successContent))
-		_, err := gbytes.TimeoutReader(res.Body, time.Second).Read(p)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(p).Should(Equal([]byte(successContent)))
+	if v := res.Header.Get("WWW-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
+		t.Errorf("res.StatusCode got '%s', want to contain '%s'", v, `realm="im-a-test-realm"`)
 	}
 
-	expectNotSuccessBody := func(res *http.Response) {
-		p := make([]byte, len(successContent))
-		_, err := gbytes.TimeoutReader(res.Body, time.Second).Read(p)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(p).ShouldNot(Equal([]byte(successContent)))
+	expectNotSuccessBody(t, res)
+}
+
+func TestHTTPAuth_NoAuthBypass(t *testing.T) {
+	ts := newAuthenticator()
+
+	c := ts.Client()
+	res, resErr := c.Get(fmt.Sprintf("%s/v2/", ts.URL))
+	if resErr != nil {
+		t.Errorf("http.Client.Get(%s) got '%v', want '%v'", fmt.Sprintf("%s/v2/", ts.URL), resErr, nil)
 	}
 
-	Context("should succeed", func() {
-		It("with no authentication", func() {
-			c := ts.Client()
-			res, err := c.Get(ts.URL)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.StatusCode).To(Equal(http.StatusUnauthorized))
-			Expect(res.Status).To(Equal("401 Unauthorized"))
-			Expect(res.Header.Get("WWW-Authenticate")).To(ContainSubstring(`realm="im-a-test-realm"`))
+	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
+	expectEqual(t, "res.Status", res.Status, "200 OK")
+	expectEqual(t, "Header[WWW-Authenticate]", res.Header.Get("WWW-Authenticate"), "")
 
-			expectNotSuccessBody(res)
-		})
+	expectSuccessBody(t, res)
+}
 
-		It("with no authentication to bypass endpoint", func() {
-			c := ts.Client()
-			res, err := c.Get(fmt.Sprintf("%s/v2/", ts.URL))
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.StatusCode).To(Equal(http.StatusOK))
-			Expect(res.Status).To(Equal("200 OK"))
-			Expect(res.Header.Get("WWW-Authenticate")).To(BeEmpty())
+func TestHTTPAuth_ValidAuth(t *testing.T) {
+	ts := newAuthenticator()
 
-			expectSuccessBody(res)
-		})
+	c := ts.Client()
+	r, reqErr := http.NewRequest(http.MethodGet, ts.URL, nil)
+	if reqErr != nil {
+		t.Errorf("http.NewRequest(%s) got '%v', want '%v'", ts.URL, reqErr, nil)
+	}
+	r.SetBasicAuth("test", "valid-pass")
 
-		It("with valid authentication to bypass endpoint", func() {
-			c := ts.Client()
-			r, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/subpath", ts.URL), nil)
-			Expect(err).NotTo(HaveOccurred())
-			r.SetBasicAuth("test", "valid-pass")
-			res, err := c.Do(r)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.StatusCode).To(Equal(http.StatusOK))
-			Expect(res.Status).To(Equal("200 OK"))
-			Expect(res.Header.Get("WWW-Authenticate")).To(BeEmpty())
+	res, resErr := c.Do(r)
+	if resErr != nil {
+		t.Errorf("http.Client.Do(%s) got '%v', want '%v'", ts.URL, resErr, nil)
+	}
 
-			expectSuccessBody(res)
-		})
+	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
+	expectEqual(t, "res.Status", res.Status, "200 OK")
+	expectEqual(t, "Header[WWW-Authenticate]", res.Header.Get("WWW-Authenticate"), "")
 
-		It("with valid authentication", func() {
-			c := ts.Client()
-			r, err := http.NewRequest(http.MethodGet, ts.URL, nil)
-			Expect(err).NotTo(HaveOccurred())
-			r.SetBasicAuth("test", "valid-pass")
-			res, err := c.Do(r)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.StatusCode).To(Equal(http.StatusOK))
-			Expect(res.Status).To(Equal("200 OK"))
-			Expect(res.Header.Get("WWW-Authenticate")).To(BeEmpty())
+	expectSuccessBody(t, res)
+}
 
-			expectSuccessBody(res)
-		})
+func TestHTTPAuth_ValidAuthBypass(t *testing.T) {
+	ts := newAuthenticator()
 
-		It("with invalid authentication", func() {
-			c := ts.Client()
-			r, err := http.NewRequest(http.MethodGet, ts.URL, nil)
-			Expect(err).NotTo(HaveOccurred())
-			r.SetBasicAuth("test", "invalid-pass")
-			res, err := c.Do(r)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.StatusCode).To(Equal(http.StatusUnauthorized))
-			Expect(res.Status).To(Equal("401 Unauthorized"))
-			Expect(res.Header.Get("WWW-Authenticate")).To(ContainSubstring(`realm="im-a-test-realm"`))
+	c := ts.Client()
+	r, reqErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/subpath", ts.URL), nil)
+	if reqErr != nil {
+		t.Errorf("http.NewRequest(%s) got '%v', want '%v'", fmt.Sprintf("%s/v2/subpath", ts.URL), reqErr, nil)
+	}
+	r.SetBasicAuth("test", "valid-pass")
 
-			expectNotSuccessBody(res)
-		})
-	})
+	res, resErr := c.Do(r)
+	if resErr != nil {
+		t.Errorf("http.Client.Do(%s) got '%v', want '%v'", fmt.Sprintf("%s/v2/subpath", ts.URL), resErr, nil)
+	}
 
-	Context("should fail", func() {
-		It("with no authentication to subdirectory of bypass endpoint", func() {
-			c := ts.Client()
-			res, err := c.Get(fmt.Sprintf("%s/v2/subpath", ts.URL))
-			Expect(err).NotTo(HaveOccurred())
-			Expect(res.StatusCode).To(Equal(http.StatusUnauthorized))
-			Expect(res.Status).To(Equal("401 Unauthorized"))
-			Expect(res.Header.Get("WWW-Authenticate")).To(ContainSubstring(`realm="im-a-test-realm"`))
+	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
+	expectEqual(t, "res.Status", res.Status, "200 OK")
+	expectEqual(t, "Header[WWW-Authenticate]", res.Header.Get("WWW-Authenticate"), "")
 
-			expectNotSuccessBody(res)
-		})
-	})
-})
+	expectSuccessBody(t, res)
+}
+
+func TestHTTPAuth_InvalidAuth(t *testing.T) {
+	ts := newAuthenticator()
+	c := ts.Client()
+	r, reqErr := http.NewRequest(http.MethodGet, ts.URL, nil)
+	if reqErr != nil {
+		t.Errorf("http.NewRequest(%s) got '%v', want '%v'", ts.URL, reqErr, nil)
+	}
+	r.SetBasicAuth("test", "invalid-pass")
+
+	res, resErr := c.Do(r)
+	if resErr != nil {
+		t.Errorf("http.Client.Do(%s) got '%v', want '%v'", ts.URL, resErr, nil)
+	}
+
+	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusUnauthorized)
+	expectEqual(t, "res.Status", res.Status, "401 Unauthorized")
+
+	if v := res.Header.Get("WWW-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
+		t.Errorf("res.StatusCode got '%s', want to contain '%s'", v, `realm="im-a-test-realm"`)
+	}
+
+	expectNotSuccessBody(t, res)
+}
+
+func TestHTTPAuth_NoAuthBypassSubdir(t *testing.T) {
+	ts := newAuthenticator()
+	c := ts.Client()
+	res, resErr := c.Get(fmt.Sprintf("%s/v2/subpath", ts.URL))
+	if resErr != nil {
+		t.Errorf("http.Client.Do(%s) got '%v', want '%v'", ts.URL, resErr, nil)
+	}
+
+	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusUnauthorized)
+	expectEqual(t, "res.Status", res.Status, "401 Unauthorized")
+
+	if v := res.Header.Get("WWW-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
+		t.Errorf("res.StatusCode got '%s', want to contain '%s'", v, `realm="im-a-test-realm"`)
+	}
+
+	expectNotSuccessBody(t, res)
+}
