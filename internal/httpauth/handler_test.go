@@ -1,7 +1,6 @@
 package httpauth_test
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -30,9 +29,9 @@ func TestHTTPAuth_NoAuthBypass(t *testing.T) {
 	ts := newAuthenticator()
 
 	c := ts.Client()
-	res, resErr := c.Get(fmt.Sprintf("%s/v2/", ts.URL))
+	res, resErr := c.Get(ts.URL + "/v2/")
 	if resErr != nil {
-		t.Errorf("http.Client.Get(%s) got '%v', want '%v'", fmt.Sprintf("%s/v2/", ts.URL), resErr, nil)
+		t.Errorf("http.Client.Get(%s) got '%v', want '%v'", ts.URL+"/v2/", resErr, nil)
 	}
 
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
@@ -68,15 +67,15 @@ func TestHTTPAuth_ValidAuthBypass(t *testing.T) {
 	ts := newAuthenticator()
 
 	c := ts.Client()
-	r, reqErr := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/subpath", ts.URL), nil)
+	r, reqErr := http.NewRequest(http.MethodGet, ts.URL+"/v2/subpath", nil)
 	if reqErr != nil {
-		t.Errorf("http.NewRequest(%s) got '%v', want '%v'", fmt.Sprintf("%s/v2/subpath", ts.URL), reqErr, nil)
+		t.Errorf("http.NewRequest(%s) got '%v', want '%v'", ts.URL+"/v2/subpath", reqErr, nil)
 	}
 	r.SetBasicAuth("test", "valid-pass")
 
 	res, resErr := c.Do(r)
 	if resErr != nil {
-		t.Errorf("http.Client.Do(%s) got '%v', want '%v'", fmt.Sprintf("%s/v2/subpath", ts.URL), resErr, nil)
+		t.Errorf("http.Client.Do(%s) got '%v', want '%v'", ts.URL+"/v2/subpath", resErr, nil)
 	}
 
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
@@ -113,7 +112,7 @@ func TestHTTPAuth_InvalidAuth(t *testing.T) {
 func TestHTTPAuth_NoAuthBypassSubdir(t *testing.T) {
 	ts := newAuthenticator()
 	c := ts.Client()
-	res, resErr := c.Get(fmt.Sprintf("%s/v2/subpath", ts.URL))
+	res, resErr := c.Get(ts.URL + "/v2/subpath")
 	if resErr != nil {
 		t.Errorf("http.Client.Do(%s) got '%v', want '%v'", ts.URL, resErr, nil)
 	}

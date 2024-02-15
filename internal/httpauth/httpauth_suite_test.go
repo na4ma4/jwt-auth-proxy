@@ -1,11 +1,11 @@
 package httpauth_test
 
 import (
+	"crypto/subtle"
 	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -27,11 +27,11 @@ func expectEqual(t *testing.T, name string, x, y interface{}) {
 var (
 	successContent = []byte("Hello World!")
 
-	authFunc = func(username string, password string, r *http.Request) (string, bool) {
+	authFunc = func(username string, password string, _ *http.Request) (string, bool) {
 		if v, ok := map[string]string{
 			"test": "valid-pass",
 		}[username]; ok {
-			if strings.Compare(v, password) == 0 {
+			if subtle.ConstantTimeCompare([]byte(password), []byte(v)) == 1 {
 				return username, true
 			}
 		}
@@ -73,7 +73,7 @@ func newAuthenticator() *httptest.Server {
 
 	authenticator := &httpauth.BasicAuthHandler{
 		BypassPaths: []string{"/v2/"},
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write(successContent)
 		}),
 		RemoveAuth: true,

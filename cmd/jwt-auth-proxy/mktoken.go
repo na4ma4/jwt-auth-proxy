@@ -15,7 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-//nolint:gochecknoglobals // cobra uses globals in main
 var cmdMakeToken = &cobra.Command{
 	Use:    "mktoken <username> [password]",
 	Short:  "Generate a token for testing",
@@ -24,7 +23,6 @@ var cmdMakeToken = &cobra.Command{
 	Hidden: true,
 }
 
-//nolint:gochecknoinits // init is used in main for cobra
 func init() {
 	cmdMakeToken.PersistentFlags().String("ca-key", "artifacts/certs/ca-key.pem", "CA private key to sign token with")
 	_ = viper.BindPFlag("server.auth-ca-key", cmdMakeToken.PersistentFlags().Lookup("ca-key"))

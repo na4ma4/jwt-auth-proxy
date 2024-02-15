@@ -34,6 +34,8 @@ linters-settings:
     # Such cases aren't reported by default.
     # Default: false
     check-type-assertions: true
+    # List of functions to exclude from checking, where each entry is a single function to exclude.
+    # See https://github.com/kisielk/errcheck#excluding-functions for details.
     exclude-functions:
       - (*go.uber.org/zap.Logger).Sync
 
@@ -122,6 +124,11 @@ linters-settings:
       - os.WriteFile
       - prometheus.ExponentialBuckets.*
       - prometheus.LinearBuckets
+      - cobra.MinimumNArgs
+
+  gomoddirectives:
+    replace-allow-list:
+      - k8s.io/kube-openapi
 
   gomodguard:
     blocked:
@@ -332,3 +339,26 @@ issues:
         - gosec
         - noctx
         - wrapcheck
+    - linters: [ staticcheck ]
+      text: "options.AndFrom is deprecated"
+    - linters: [ staticcheck ]
+      text: "The component config package has been deprecated and will be removed in a future release."
+    - path: "cmd/"
+      linters:
+        - gochecknoinits
+        - gochecknoglobals
+    # Exclude `lll` issues for long lines with `go:generate`.
+    - linters:
+        - lll
+      source: '^//\s*\+kubebuilder:'
+    - linters:
+        - godot
+      source: '^//\s*\+optional'
+    - path: "api/v1/"
+      linters:
+        - gochecknoinits
+    # Allow dot imports for ginkgo and gomega
+    - source: ginkgo|gomega
+      linters:
+        - revive
+      text: "should not use dot imports"

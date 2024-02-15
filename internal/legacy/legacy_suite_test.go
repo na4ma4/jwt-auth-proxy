@@ -8,7 +8,7 @@ import (
 )
 
 //nolint:gochecknoglobals // constant for tests.
-var denyAuthFunc = func(username string, password string, r *http.Request) (string, bool) {
+var denyAuthFunc = func(_ string, _ string, _ *http.Request) (string, bool) {
 	return "", false
 }
 

@@ -28,15 +28,14 @@ import (
 
 const (
 	httpServerTimeout = 10 * time.Second
+	defaultHTTPPort   = 80
 )
 
-//nolint:gochecknoglobals // cobra uses globals in main
 var rootCmd = &cobra.Command{
 	Use: "jwt-auth-proxy",
 	Run: mainCommand,
 }
 
-//nolint:gochecknoinits,gomnd // init is used in main for cobra
 func init() {
 	cobra.OnInitialize(mainconfig.ConfigInit)
 
@@ -48,7 +47,7 @@ func init() {
 	_ = viper.BindPFlag("server.backend-uri", rootCmd.PersistentFlags().Lookup("backend"))
 	_ = viper.BindEnv("server.backend-uri", "BACKEND_URL")
 
-	rootCmd.PersistentFlags().IntP("port", "p", 80, "HTTP Port")
+	rootCmd.PersistentFlags().IntP("port", "p", defaultHTTPPort, "HTTP Port")
 	_ = viper.BindPFlag("server.port", rootCmd.PersistentFlags().Lookup("port"))
 	_ = viper.BindEnv("server.port", "HTTP_PORT")
 
