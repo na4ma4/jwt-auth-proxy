@@ -18,7 +18,7 @@ func TestHTTPAuth_NoAuth(t *testing.T) {
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusUnauthorized)
 	expectEqual(t, "res.Status", res.Status, "401 Unauthorized")
 
-	if v := res.Header.Get("WWW-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
+	if v := res.Header.Get("Www-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
 		t.Errorf("res.StatusCode got '%s', want to contain '%s'", v, `realm="im-a-test-realm"`)
 	}
 
@@ -36,7 +36,7 @@ func TestHTTPAuth_NoAuthBypass(t *testing.T) {
 
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
 	expectEqual(t, "res.Status", res.Status, "200 OK")
-	expectEqual(t, "Header[WWW-Authenticate]", res.Header.Get("WWW-Authenticate"), "")
+	expectEqual(t, "Header[Www-Authenticate]", res.Header.Get("Www-Authenticate"), "")
 
 	expectSuccessBody(t, res)
 }
@@ -58,7 +58,7 @@ func TestHTTPAuth_ValidAuth(t *testing.T) {
 
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
 	expectEqual(t, "res.Status", res.Status, "200 OK")
-	expectEqual(t, "Header[WWW-Authenticate]", res.Header.Get("WWW-Authenticate"), "")
+	expectEqual(t, "Header[Www-Authenticate]", res.Header.Get("Www-Authenticate"), "")
 
 	expectSuccessBody(t, res)
 }
@@ -80,7 +80,7 @@ func TestHTTPAuth_ValidAuthBypass(t *testing.T) {
 
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusOK)
 	expectEqual(t, "res.Status", res.Status, "200 OK")
-	expectEqual(t, "Header[WWW-Authenticate]", res.Header.Get("WWW-Authenticate"), "")
+	expectEqual(t, "Header[Www-Authenticate]", res.Header.Get("Www-Authenticate"), "")
 
 	expectSuccessBody(t, res)
 }
@@ -102,7 +102,7 @@ func TestHTTPAuth_InvalidAuth(t *testing.T) {
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusUnauthorized)
 	expectEqual(t, "res.Status", res.Status, "401 Unauthorized")
 
-	if v := res.Header.Get("WWW-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
+	if v := res.Header.Get("Www-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
 		t.Errorf("res.StatusCode got '%s', want to contain '%s'", v, `realm="im-a-test-realm"`)
 	}
 
@@ -120,7 +120,7 @@ func TestHTTPAuth_NoAuthBypassSubdir(t *testing.T) {
 	expectEqual(t, "res.StatusCode", res.StatusCode, http.StatusUnauthorized)
 	expectEqual(t, "res.Status", res.Status, "401 Unauthorized")
 
-	if v := res.Header.Get("WWW-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
+	if v := res.Header.Get("Www-Authenticate"); !strings.Contains(v, `realm="im-a-test-realm"`) {
 		t.Errorf("res.StatusCode got '%s', want to contain '%s'", v, `realm="im-a-test-realm"`)
 	}
 

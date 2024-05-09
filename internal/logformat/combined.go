@@ -48,7 +48,7 @@ func buildCommonLogLine(req *http.Request, url url.URL, ts time.Time, status int
 		uri = url.RequestURI()
 	}
 
-	buf := make([]byte, 0, 3*(len(host)+len(username)+len(req.Method)+len(uri)+len(req.Proto)+50)/2) //nolint:lll,gomnd // buffer size calculation.
+	buf := make([]byte, 0, 3*(len(host)+len(username)+len(req.Method)+len(uri)+len(req.Proto)+50)/2) //nolint:lll,mnd // buffer size calculation.
 	buf = append(buf, host...)
 	buf = append(buf, " - "...)
 	buf = append(buf, username...)

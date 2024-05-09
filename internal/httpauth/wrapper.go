@@ -29,7 +29,7 @@ type BasicAuthWrapper struct {
 
 // Require authentication, and serve our error handler otherwise.
 func (b *BasicAuthWrapper) requestAuth(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("WWW-Authenticate", fmt.Sprintf(`Basic realm=%q`, b.Realm))
+	w.Header().Set("Www-Authenticate", fmt.Sprintf(`Basic realm=%q`, b.Realm))
 	b.UnauthorizedHandler.ServeHTTP(w, r)
 }
 
@@ -93,7 +93,7 @@ func defaultUnauthorizedHandler(w http.ResponseWriter, _ *http.Request) {
 
 // GetBasicAuthFromRequest returns basic auth username and password given a `*http.Request`.
 //
-//nolint:gomnd // basic authentication format
+//nolint:mnd // basic authentication format
 func GetBasicAuthFromRequest(r *http.Request) (string, string, error) {
 	const basicScheme string = "Basic "
 
