@@ -22,4 +22,4 @@ ENTRYPOINT [ "/bin/jwt-auth-proxy" ]
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs/
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
-COPY artifacts/build/release/$TARGETPLATFORM/* /bin/
+COPY jwt-auth-proxy /bin/
