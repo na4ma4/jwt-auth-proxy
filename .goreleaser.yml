@@ -63,6 +63,7 @@ dockers:
     - "ghcr.io/na4ma4/jwt-auth-proxy:latest"
     extra_files:
     - "scripts/replace-links-in-ssl-certs.sh"
+    dockerfile: Dockerfile.goreleaser
     build_flag_templates:
     - "--pull"
     - "--label=org.opencontainers.image.created={{.Date}}"
