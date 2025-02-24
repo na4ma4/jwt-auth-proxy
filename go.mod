@@ -1,6 +1,7 @@
 module github.com/na4ma4/jwt-auth-proxy
 
 go 1.22.2
+toolchain go1.23.6
 
 require (
 	github.com/dosquad/go-cliversion v0.2.1
@@ -15,7 +16,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 )
 
 require (
