@@ -1,4 +1,4 @@
-# jwt-auth-proxy
+# ~jwt-auth-proxy~
 
 [![CI](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/na4ma4/jwt-auth-proxy/actions/workflows/codeql-analysis.yml)
@@ -6,6 +6,8 @@
 [![GitHub forks](https://img.shields.io/github/forks/na4ma4/jwt-auth-proxy)](https://github.com/na4ma4/jwt-auth-proxy/network)
 [![GitHub stars](https://img.shields.io/github/stars/na4ma4/jwt-auth-proxy)](https://github.com/na4ma4/jwt-auth-proxy/stargazers)
 [![GitHub license](https://img.shields.io/github/license/na4ma4/jwt-auth-proxy)](https://github.com/na4ma4/jwt-auth-proxy/blob/main/LICENSE)
+
+**NOTE: No longer maintained.**
 
 Authentication proxy that uses JWT tokens (and supports specified legacy authentication), written entirely in Go.
 
