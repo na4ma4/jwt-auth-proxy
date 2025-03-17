@@ -76,7 +76,7 @@ nfpms:
     id: jwt-auth-proxy
     package_name: jwt-auth-proxy
     file_name_template: "jwt-auth-proxy_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    builds:
+    ids:
       - jwt-auth-proxy
     homepage: https://github.com/na4ma4/jwt-auth-proxy
     maintainer: na4ma4 <na4ma4@users.noreply.github.com>
