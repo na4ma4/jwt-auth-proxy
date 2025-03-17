@@ -12,6 +12,7 @@ COPY scripts/replace-links-in-ssl-certs.sh /
 RUN /replace-links-in-ssl-certs.sh
 
 FROM scratch
+ARG TARGETPLATFORM
 
 LABEL org.opencontainers.image.source=https://github.com/na4ma4/jwt-auth-proxy
 
